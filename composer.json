@@ -1,0 +1,39 @@
+{
+    "name": "attla/data-token",
+    "description": "Turn everything into a token: randomized or predictable.",
+    "keywords": [
+        "attla",
+        "laravel",
+        "data-to-token",
+        "tokenizer"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lucas Nicolau",
+            "email": "lucas@octha.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.2.5",
+        "attla/pincryp": "dev-main",
+        "hisorange/browser-detect": "^4.5.2",
+        "illuminate/contracts": "^6.0|^7.0|^8.0|^9.0",
+        "illuminate/support": "^6.0|^7.0|^8.0|^9.0",
+        "nesbot/carbon": "^2.31"
+    },
+    "autoload": {
+        "psr-4": {
+            "Attla\\DataToken\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "aliases": {
+                "DataToken": "Attla\\DataToken\\Facade"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
