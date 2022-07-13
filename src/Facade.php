@@ -1,6 +1,6 @@
 <?php
 
-namespace Attla\Pincryp;
+namespace Attla\DataToken;
 
 use Illuminate\Support\Facades\Facade as BaseFacade;
 
