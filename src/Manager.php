@@ -105,12 +105,12 @@ class Manager
         }
 
         // bwr validation
-        if (isset($header->bwr) && $this->browser() != $header->bwr) {
+        if (isset($header->bwr) && $this->getBrowser() != $header->bwr) {
             return false;
         }
 
         // ip validation
-        if (isset($header->ip) && $this->ip() != $header->ip) {
+        if (isset($header->ip) && $this->getIp() != $header->ip) {
             return false;
         }
 
@@ -225,7 +225,7 @@ class Manager
      */
     public function bwr(): self
     {
-        $this->header['bwr'] = $this->browser();
+        $this->header['bwr'] = $this->getBrowser();
         return $this;
     }
 
@@ -236,7 +236,7 @@ class Manager
      */
     public function ip(): self
     {
-        $this->header['ip'] = request()->getClientIp();
+        $this->header['ip'] = $this->getIp();
         return $this;
     }
 
@@ -305,14 +305,23 @@ class Manager
     }
 
     /**
-     * Get browser
+     * Get the client browser
      *
-     * @param string $entropy
-     * @return self
+     * @return string
      */
-    protected function browser()
+    protected function getBrowser(): string
     {
         return \Browser::browserFamily() . \Browser::browserVersionMajor();
+    }
+
+    /**
+     * Get the client IP address
+     *
+     * @return string|null
+     */
+    protected function getIp()
+    {
+        return request()->getClientIp();
     }
 
     /**
