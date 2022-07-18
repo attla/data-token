@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Facade as BaseFacade;
  * @method static mixed parseString(string $data, bool $assoc = false)
  * @method static mixed parse(string $data, bool $assoc = false)
  * @method static self payload($value)
+ * @method static self body($value)
  * @method static self secret(string $secret)
  * @method static self same(string $entropy)
  * @method static self exp(int|\Carbon\CarbonInterface $exp = 30)
