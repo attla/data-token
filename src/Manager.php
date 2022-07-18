@@ -2,8 +2,9 @@
 
 namespace Attla\DataToken;
 
-use Pincryp;
+use Attla\Pincryp\Facade as Pincryp;
 use Carbon\CarbonInterface;
+use hisorange\BrowserDetect\Facade as BrowserDetect;
 use Illuminate\Support\Enumerable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Contracts\Support\Arrayable;
@@ -311,7 +312,7 @@ class Manager
      */
     protected function getBrowser(): string
     {
-        return \Browser::browserFamily() . \Browser::browserVersionMajor();
+        return BrowserDetect::browserFamily() . BrowserDetect::browserVersionMajor();
     }
 
     /**
