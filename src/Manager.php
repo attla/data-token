@@ -3,11 +3,9 @@
 namespace Attla\DataToken;
 
 use Attla\Pincryp\Facade as Pincryp;
+use Attla\Support\Arr as AttlaArr;
 use Carbon\CarbonInterface;
 use hisorange\BrowserDetect\Facade as BrowserDetect;
-use Illuminate\Support\Enumerable;
-use Illuminate\Contracts\Support\Jsonable;
-use Illuminate\Contracts\Support\Arrayable;
 
 class Manager
 {
@@ -52,7 +50,7 @@ class Manager
 
         $payload = Pincryp::encode($this->payload, $this->getEntropy());
         $header = Pincryp::encode(
-            $this->same ? $this->header : $this->randomArray($this->header),
+            $this->same ? $this->header : AttlaArr::randomized($this->header),
             $this->secret
         );
 
@@ -115,7 +113,7 @@ class Manager
             return false;
         }
 
-        $this->header = $this->toArray($header);
+        $this->header = AttlaArr::toArray($header);
         $this->payload = $this->primitiveOrArray($payload);
 
         return $payload;
@@ -326,31 +324,6 @@ class Manager
     }
 
     /**
-     * Convert a value to array
-     *
-     * @param mixed $value
-     * @return array
-     */
-    protected function toArray($value)
-    {
-        if (is_array($value)) {
-            return $value;
-        } elseif ($value instanceof Enumerable) {
-            return $value->all();
-        } elseif ($value instanceof Arrayable) {
-            return $value->toArray();
-        } elseif ($value instanceof Jsonable) {
-            return json_decode($value->toJson(), true);
-        } elseif ($value instanceof \JsonSerializable) {
-            return (array) $value->jsonSerialize();
-        } elseif ($value instanceof \Traversable) {
-            return iterator_to_array($value);
-        }
-
-        return (array) $value;
-    }
-
-    /**
      * Get a primitive value or array
      *
      * @param mixed $value
@@ -366,29 +339,6 @@ class Manager
             return $value;
         }
 
-        return $this->toArray($value);
-    }
-
-    /**
-     * Randomize positions of an array
-     *
-     * @param array $array
-     * @return array
-     */
-    protected function randomArray($array = [])
-    {
-        if (!$array = $this->toArray($array)) {
-            return [];
-        }
-
-        $keys = array_keys($array);
-        shuffle($keys);
-
-        $return = [];
-        foreach ($keys as $index) {
-            $return[$index] = $array[$index];
-        }
-
-        return $return;
+        return AttlaArr::toArray($value);
     }
 }

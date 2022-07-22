@@ -18,8 +18,6 @@
         "php": ">=7.2.5",
         "attla/pincryp": "dev-main",
         "hisorange/browser-detect": "^4.5.2",
-        "illuminate/contracts": "^6.0|^7.0|^8.0|^9.0",
-        "illuminate/support": "^6.0|^7.0|^8.0|^9.0",
         "nesbot/carbon": "^2.31"
     },
     "autoload": {
