@@ -84,13 +84,13 @@ $sign = DataToken::sign(123);
 | ``parseString(data, assoc)`` | String, Boolean | Alias for ``decode()`` |
 | ``parse(data, assoc)`` | String, Boolean | Alias for ``decode()`` |
 | ``iss()`` | - | Define the token issuer claim |
-| ``exp(minutes)`` | Integer|CarbonInterface | Time to expire the token |
+| ``exp(minutes)`` | Integer or CarbonInterface | Time to expire the token |
 | ``payload(content)`` | Mixed | Set the content of the token, that can be a model, array, object, or anything, but can't be false |
 | ``bwr()`` | - | Set the browser identifier to the token |
 | ``ip()`` | - | Set the IP address from user to the token |
 | ``body()`` | - | Alias for ``payload()`` |
 | ``same()`` | - | Make the token always the same |
-| ``sign(minutesExpiration)`` | Integer|CarbonInterface | Create a strong validation of the token |
+| ``sign(minutesExpiration)`` | Integer or CarbonInterface | Create a strong validation of the token |
 | ``id(data)`` | Mixed | Generate a unique identifier of anything |
 | ``sid(data)`` | - | Always generate the same identifier of anything |
 | ``getEntropy()`` | - | Get entropy of the token |
