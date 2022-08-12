@@ -159,7 +159,7 @@ class Manager
      * Set JWT payload
      *
      * @param mixed $value
-     * @return mixed
+     * @return $this
      */
     public function payload($value): self
     {
@@ -171,7 +171,7 @@ class Manager
      * Alias of payload
      *
      * @param mixed $value
-     * @return mixed
+     * @return $this
      */
     public function body($value): self
     {
@@ -182,7 +182,7 @@ class Manager
      * Set JWT secret
      *
      * @param string $secret
-     * @return self
+     * @return $this
      */
     public function secret(string $secret): self
     {
@@ -194,7 +194,7 @@ class Manager
      * Set JWT expiration time
      *
      * @param int|\Carbon\CarbonInterface $exp
-     * @return self
+     * @return $this
      */
     public function exp(int|CarbonInterface $exp = 30): self
     {
@@ -209,7 +209,7 @@ class Manager
     /**
      * Set JWT iss validation
      *
-     * @return self
+     * @return $this
      */
     public function iss(string $value = ''): self
     {
@@ -220,7 +220,7 @@ class Manager
     /**
      * Set JWT browser validation
      *
-     * @return self
+     * @return $this
      */
     public function bwr(): self
     {
@@ -231,7 +231,7 @@ class Manager
     /**
      * Set JWT IP validation
      *
-     * @return self
+     * @return $this
      */
     public function ip(): self
     {
@@ -243,7 +243,7 @@ class Manager
      * Signs a JWT with security validations
      *
      * @param int|\Carbon\CarbonInterface $epx
-     * @return self
+     * @return $this
      */
     public function sign(int|CarbonInterface $exp = 30): self
     {
@@ -294,7 +294,7 @@ class Manager
      * Set JWT to same mode
      *
      * @param string $entropy
-     * @return self
+     * @return $this
      */
     public function same(string $entropy = ''): self
     {
@@ -340,5 +340,15 @@ class Manager
         }
 
         return AttlaArr::toArray($value);
+    }
+
+    /**
+     * Encode the token if it is casted as a string
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->encode();
     }
 }

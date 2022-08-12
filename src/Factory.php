@@ -25,36 +25,26 @@ namespace Attla\DataToken;
 class Factory
 {
     /**
-     * DataToken manager instance
+     * Dynamically create a token manager calling any method
      *
-     * @var \Attla\DataToken\Manager
+     * @param string $name
+     * @param array $arguments
+     * @return \Attla\DataToken\Manager|mixed
      */
-    protected Manager $factory;
-
-    public function __construct()
-    {
-        $this->factory = new Manager();
-    }
-
-    public function __toString(): string
-    {
-        return $this->factory->encode();
-    }
-
     public function __call($name, $arguments)
     {
-        if (!method_exists($this->factory, $name)) {
-            throw new \BadMethodCallException(
-                sprintf("The method '%s' doesn't exists in DataToken Class", $name)
-            );
-        }
-
-        $result = $this->factory->{$name}(...$arguments);
-        return $result instanceof Manager ? $this : $result;
+        return (new Manager())->{$name}(...$arguments);
     }
 
+    /**
+     * Dynamically create a token manager by calling statically any method
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return \Attla\DataToken\Manager|mixed
+     */
     public static function __callStatic($name, $arguments)
     {
-        return (new static())->{$name}(...$arguments);
+        return (new Manager())->{$name}(...$arguments);
     }
 }
