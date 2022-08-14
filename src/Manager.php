@@ -44,10 +44,6 @@ class Manager
      */
     public function encode(): string
     {
-        if (!$this->payload) {
-            throw new \Exception('DataToken require a not empty payload.');
-        }
-
         $payload = Pincryp::encode($this->payload, $this->getEntropy());
         $header = Pincryp::encode(
             $this->same ? $this->header : AttlaArr::randomized($this->header),
