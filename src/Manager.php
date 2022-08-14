@@ -209,6 +209,7 @@ class Manager
     /**
      * Set JWT iss validation
      *
+     * @param string $value
      * @return $this
      */
     public function iss(string $value = ''): self
