@@ -17,8 +17,9 @@
     "require": {
         "php": ">=7.2.5",
         "attla/pincryp": "dev-main",
-        "hisorange/browser-detect": "^4.5.2",
-        "nesbot/carbon": "^2.31"
+        "hisorange/browser-detect": "^4.5.4",
+        "nesbot/carbon": "^2.64",
+        "hashids/hashids": "^4.1"
     },
     "autoload": {
         "psr-4": {
@@ -33,5 +34,18 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "require-dev": {
+        "pestphp/pest": "^1.22",
+        "pestphp/pest-plugin-global-assertions": "^1.0"
+    },
+    "scripts": {
+        "test": "vendor/bin/pest",
+        "test-coverage": "vendor/bin/pest --coverage-html coverage"
+    },
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    }
 }

@@ -2,117 +2,72 @@
 
 namespace Attla\DataToken;
 
-use Attla\Pincryp\Facade as Pincryp;
-use Attla\Support\Arr as AttlaArr;
 use Carbon\CarbonInterface;
+use Attla\Support\Arr as AttlaArr;
+use Attla\Pincryp\Factory as Pincryp;
 use hisorange\BrowserDetect\Facade as BrowserDetect;
 
 class Manager
 {
     /**
-     * The header of the JWT
+     * The token instance
      *
-     * @var array
+     * @var \Attla\DataToken\Token
      */
-    private array $header = [];
+    private Token $token;
 
     /**
-     * The payload of the JWT
+     * Create a new Manager instance
      *
-     * @var mixed
+     * @return void
      */
-    private $payload;
+    public function __construct()
+    {
+        $this->token = new Token();
+    }
 
     /**
-     * The secret passphrase of the JWT
-     *
-     * @var string
-     */
-    private string $secret = '';
-
-    /**
-     * Determine if the JWT is on same mode
-     *
-     * @var bool
-     */
-    private bool $same = false;
-
-    /**
-     * Encode a JWT
+     * Encode the token
      *
      * @return string
      */
     public function encode(): string
     {
-        $payload = Pincryp::encode($this->payload, $this->getEntropy());
-        $header = Pincryp::encode(
-            $this->same ? $this->header : AttlaArr::randomized($this->header),
-            $this->secret
-        );
-
-        return $header . '_'
-            . $payload . '_'
-            . Pincryp::md5($header . $payload, $this->secret);
+        return $this->token->encodedHeader()
+            . '.' . $this->token->encodedBody()
+            . '.' . $this->token->signature();
     }
 
     /**
-     * Decode the JWT if is valid
+     * Decode the token if is valid
      *
      * @param string $data
-     * @param bool $assoc
      * @return mixed
      */
-    public function decode($data, bool $assoc = false)
+    public function decode($data)
     {
-        if (!$data || !is_string($data)) {
-            return false;
-        }
-
-        $data = explode('_', $data);
-        if (count($data) != 3) {
+        if (
+            !$data
+            || !is_string($data)
+            || count($data = explode('.', $data)) != 3
+        ) {
             return false;
         }
 
         [$header, $payload, $signature] = $data;
 
-        if ($signature != Pincryp::md5($header . $payload, $this->secret)) {
+        $this->token->header($header)
+            ->body($payload)
+            ->signature($signature);
+
+        if ($this->token->isInvalid()) {
+            // var_dump(11111);
+            // var_dump('invalid: ' . join('.', $data));
             return false;
         }
 
-        $header = Pincryp::decode($header, $this->secret);
-        if (!$header instanceof \StdClass) {
-            return false;
-        }
-
-        $payload = Pincryp::decode($payload, $header->e ?? '', $assoc);
-        if (!$payload) {
-            return false;
-        }
-
-        // exp validation
-        if (isset($header->exp) && time() > $header->exp) {
-            return false;
-        }
-
-        // iss validation
-        if (isset($header->iss) && $_SERVER['HTTP_HOST'] != $header->iss) {
-            return false;
-        }
-
-        // bwr validation
-        if (isset($header->bwr) && $this->getBrowser() != $header->bwr) {
-            return false;
-        }
-
-        // ip validation
-        if (isset($header->ip) && $this->getIp() != $header->ip) {
-            return false;
-        }
-
-        $this->header = AttlaArr::toArray($header);
-        $this->payload = $this->primitiveOrArray($payload);
-
-        return $payload;
+        // TODO: retornar o manager e se quiser dps pega o body
+        return $this->token->body();
     }
 
     /**
@@ -122,9 +77,9 @@ class Manager
      * @param bool $assoc
      * @return mixed
      */
-    public function fromString(string $data, bool $assoc = false)
+    public function fromString($data)
     {
-        return $this->decode($data, $assoc);
+        return $this->decode($data);
     }
 
     /**
@@ -134,9 +89,9 @@ class Manager
      * @param bool $assoc
      * @return mixed
      */
-    public function parseString(string $data, bool $assoc = false)
+    public function parseString($data)
     {
-        return $this->decode($data, $assoc);
+        return $this->decode($data);
     }
 
     /**
@@ -146,20 +101,20 @@ class Manager
      * @param bool $assoc
      * @return mixed
      */
-    public function parse(string $data, bool $assoc = false)
+    public function parse($data)
     {
-        return $this->decode($data, $assoc);
+        return $this->decode($data);
     }
 
     /**
-     * Set JWT payload
+     * Set data token payload
      *
      * @param mixed $value
      * @return $this
      */
     public function payload($value): self
     {
-        $this->payload = $this->primitiveOrArray($value);
+        $this->token->payload = $value;
         return $this;
     }
 
@@ -175,32 +130,190 @@ class Manager
     }
 
     /**
-     * Set JWT secret
+     * Set data token secret
      *
      * @param string $secret
      * @return $this
      */
     public function secret(string $secret): self
     {
-        $this->secret = $secret;
+        $this->token->secret($secret);
         return $this;
     }
 
     /**
-     * Set JWT expiration time
+     * Set token expiration date
      *
-     * @param int|\Carbon\CarbonInterface $exp
+     * @param int|\Carbon\CarbonInterface|\DateTimeInterface $date
      * @return $this
      */
-    public function exp(int|CarbonInterface $exp = 30): self
+    public function expiration(int|CarbonInterface|\DateTimeInterface $date): self
     {
-        if ($exp instanceof CarbonInterface) {
-            $exp = $exp->timestamp;
-        }
-
-        $this->header['exp'] = time() > $exp ? time() + ($exp * 60) : $exp;
+        $this->token->header->set(Claims::EXPIRATION_TIME, Util::timestamp($date));
+        // $this->token->header[Claims::EXPIRATION_TIME] = Util::timestamp($date);
         return $this;
     }
+
+    /**
+     * Set token expiration date validation
+     *
+     * @param int|\Carbon\CarbonInterface|\DateTimeInterface $date
+     * @return $this
+     */
+    public function exp(int|CarbonInterface|\DateTimeInterface $date): self
+    {
+        return $this->expiration($date);
+    }
+
+    /**
+     * Set token not before date validation
+     *
+     * @param int|\Carbon\CarbonInterface|\DateTimeInterface $date
+     * @return $this
+     */
+    public function notBefore(int|CarbonInterface|\DateTimeInterface $date): self
+    {
+        $this->token->header->set(Claims::NOT_BEFORE, Util::timestamp($date));
+        return $this;
+    }
+
+    /**
+     * Set token not before date validation
+     *
+     * @param int|\Carbon\CarbonInterface|\DateTimeInterface $date
+     * @return $this
+     */
+    public function nbf(int|CarbonInterface|\DateTimeInterface $date): self
+    {
+        return $this->notBefore($date);
+    }
+
+    /**
+     * Set token issued before date validation
+     *
+     * @param int|\Carbon\CarbonInterface|\DateTimeInterface $date
+     * @return $this
+     */
+    public function issuedBefore(int|CarbonInterface|\DateTimeInterface $date): self
+    {
+        $this->token->header->set(Claims::ISSUED_AT, Util::timestamp($date));
+        return $this;
+    }
+
+    /**
+     * Set token issued before date validation
+     *
+     * @param int|\Carbon\CarbonInterface|\DateTimeInterface $date
+     * @return $this
+     */
+    public function iat(int|CarbonInterface|\DateTimeInterface $date): self
+    {
+        return $this->issuedBefore($date);
+    }
+
+    /**
+     * Set token audience validation.
+     *
+     * @param mixed $aud
+     * @return $this
+     */
+    public function audience($aud): self
+    {
+        $this->token->header->set(Claims::AUDIENCE, array_merge(
+            (array) $this->token->header->get(Claims::AUDIENCE, []),
+            is_array($aud) ? $aud : [$aud]
+        ));
+
+        return $this;
+    }
+
+    /**
+     * Set token audience validation.
+     *
+     * @param mixed $aud
+     * @return $this
+     */
+    public function aud($aud): self
+    {
+        return $this->audience($aud);
+    }
+
+
+
+
+
+    /**
+     * Set token body as associative when it can be converted.
+     *
+     * @return $this
+     */
+    public function associative(): self
+    {
+        $this->token->associative = true;
+        return $this;
+    }
+
+    /**
+     * Set token body as object when it can be converted.
+     *
+     * @return $this
+     */
+    public function asObject(): self
+    {
+        $this->token->associative = false;
+        return $this;
+    }
+
+    /**
+     * Encode the token if it is casted as a string
+     *
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->encode();
+    }
+
+    /**
+     * Dynamically call any token method
+     *
+     * @param string $name
+     * @param array $arguments
+     * @return $this
+     */
+    public function __call($name, $arguments)
+    {
+        $this->token->{$name}(...$arguments);
+
+        return $this;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     /**
      * Set JWT iss validation
@@ -337,15 +450,5 @@ class Manager
         }
 
         return AttlaArr::toArray($value);
-    }
-
-    /**
-     * Encode the token if it is casted as a string
-     *
-     * @return string
-     */
-    public function __toString(): string
-    {
-        return $this->encode();
     }
 }

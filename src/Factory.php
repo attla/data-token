@@ -2,49 +2,49 @@
 
 namespace Attla\DataToken;
 
+// * @method static string encode()
+// * @method static mixed decode(string $data, bool $assoc = false)
+// * @method static mixed fromString(string $data, bool $assoc = false)
+// * @method static mixed parseString(string $data, bool $assoc = false)
+// * @method static mixed parse(string $data, bool $assoc = false)
+// * @method static self payload($value)
+// * @method static self body($value)
+// * @method static self secret(string $secret)
+// * @method static self same(string $entropy)
+// * @method static self exp(int|\Carbon\CarbonInterface $exp = 30)
+// * @method static self iss(string $value = '')
+// * @method static self bwr()
+// * @method static self ip()
+// * @method static self sign(int|\Carbon\CarbonInterface $exp = 30)
+// * @method static string id($value)
+// * @method static string sid($value)
 /**
- * @method static string encode()
- * @method static mixed decode(string $data, bool $assoc = false)
- * @method static mixed fromString(string $data, bool $assoc = false)
- * @method static mixed parseString(string $data, bool $assoc = false)
- * @method static mixed parse(string $data, bool $assoc = false)
- * @method static self payload($value)
- * @method static self body($value)
- * @method static self secret(string $secret)
- * @method static self same(string $entropy)
- * @method static self exp(int|\Carbon\CarbonInterface $exp = 30)
- * @method static self iss(string $value = '')
- * @method static self bwr()
- * @method static self ip()
- * @method static self sign(int|\Carbon\CarbonInterface $exp = 30)
- * @method static string id($value)
- * @method static string sid($value)
+ * @method static Creator create()
+ * @method static Parser parse(string $token)
  *
- * @see \Attla\DataToken\Manager
+ * @see \Attla\DataToken\Creator
+ * @see \Attla\DataToken\Parser
  */
 class Factory
 {
     /**
-     * Dynamically create a token manager calling any method
+     * Returns a token creation manager.
      *
-     * @param string $name
-     * @param array $arguments
-     * @return \Attla\DataToken\Manager|mixed
+     * @return \Attla\DataToken\Creator
      */
-    public function __call($name, $arguments)
+    public static function create(): Creator
     {
-        return (new Manager())->{$name}(...$arguments);
+        return new Creator();
     }
 
     /**
-     * Dynamically create a token manager by calling statically any method
+     * Returns a token parse manager.
      *
-     * @param string $name
-     * @param array $arguments
-     * @return \Attla\DataToken\Manager|mixed
+     * @param string $token
+     * @return \Attla\DataToken\Parser
      */
-    public static function __callStatic($name, $arguments)
+    public static function parse(string $token): Parser
     {
-        return (new Manager())->{$name}(...$arguments);
+        return new Parser($token);
     }
 }
